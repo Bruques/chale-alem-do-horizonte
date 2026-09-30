@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · Além do Horizonte</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12100c; --surface:#1a1610; --card:#211c15;
+    --ink:#f3ead9; --ink-dim:#cbbfa8; --muted:#8f8571;
+    --accent:#d78a44; --line:rgba(243,234,217,0.14);
+    --ok:#7ea36b; --blocked:#c25b4a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Work Sans',sans-serif; line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:32px 20px 80px;}
+  h1{font-size:1.3rem; margin:0 0 4px;}
+  .sub{color:var(--muted); font-size:0.85rem; margin:0 0 32px;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:6px;
+    padding:24px; margin-bottom:24px;
+  }
+  label{display:block; font-size:0.78rem; color:var(--ink-dim); margin-bottom:6px; letter-spacing:0.02em;}
+  input{
+    width:100%; padding:11px 14px; border-radius:4px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); font-size:0.95rem; font-family:inherit;
+  }
+  input:focus{outline:none; border-color:var(--accent);}
+  .row{display:flex; gap:14px; flex-wrap:wrap;}
+  .row > div{flex:1 1 200px;}
+  button{
+    font-family:inherit; font-weight:600; font-size:0.85rem; cursor:pointer;
+    padding:11px 20px; border-radius:4px; border:1px solid var(--accent);
+    background:var(--accent); color:#1a1208; transition:opacity .2s;
+  }
+  button:hover{opacity:0.85;}
+  button.ghost{background:transparent; color:var(--ink-dim); border-color:var(--line);}
+  button:disabled{opacity:0.4; cursor:not-allowed;}
+  .msg{font-size:0.82rem; margin-top:10px; min-height:1.2em;}
+  .msg.ok{color:var(--ok);}
+  .msg.err{color:var(--blocked);}
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;}
+  .topbar button{padding:8px 14px; font-size:0.78rem;}
+
+  /* calendar */
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .cal-head h3{margin:0; font-size:1.05rem; text-transform:capitalize;}
+  .cal-head .navbtn{
+    background:transparent; border:1px solid var(--line); color:var(--ink);
+    width:34px; height:34px; border-radius:4px; padding:0; font-size:1rem;
+  }
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal-dow{text-align:center; font-size:0.7rem; color:var(--muted); text-transform:uppercase; padding-bottom:6px;}
+  .cal-day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:4px; font-size:0.85rem; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink-dim); cursor:pointer; user-select:none;
+  }
+  .cal-day.empty{visibility:hidden; cursor:default;}
+  .cal-day.past{opacity:0.3; cursor:not-allowed;}
+  .cal-day.available{color:var(--ok); border-color:rgba(126,163,107,0.4);}
+  .cal-day.blocked{background:rgba(194,91,74,0.18); color:var(--blocked); border-color:rgba(194,91,74,0.5);}
+  .legend{display:flex; gap:18px; margin-top:16px; font-size:0.78rem; color:var(--muted); flex-wrap:wrap;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.available{background:var(--ok);}
+  .dot.blocked{background:var(--blocked);}
+
+  .hidden{display:none !important;}
+  a.back{color:var(--muted); font-size:0.8rem; text-decoration:none;}
+  a.back:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Voltar para o site</a>
+
+  <div id="login-view" class="card" style="margin-top:20px;">
+    <h1>Painel do Chalé</h1>
+    <p class="sub">Entre com o e-mail e senha cadastrados para gerenciar datas e preço.</p>
+    <div class="row">
+      <div>
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="username">
+      </div>
+      <div>
+        <label for="password">Senha</label>
+        <input id="password" type="password" autocomplete="current-password">
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button id="login-btn">Entrar</button>
+    </div>
+    <p id="login-msg" class="msg"></p>
+  </div>
+
+  <div id="app-view" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1 style="margin-bottom:2px;">Painel do Chalé</h1>
+        <p class="sub" style="margin:0;">Clique num dia para bloquear ou liberar.</p>
+      </div>
+      <button class="ghost" id="logout-btn">Sair</button>
+    </div>
+
+    <div class="card">
+      <label for="price">Valor da diária (R$)</label>
+      <div class="row" style="align-items:flex-end;">
+        <div><input id="price" type="number" min="0" step="10" placeholder="Ex: 450"></div>
+        <div style="flex:0 0 auto;"><button id="save-price-btn">Salvar preço</button></div>
+      </div>
+      <p id="price-msg" class="msg"></p>
+    </div>
+
+    <div class="card">
+      <div class="cal-head">
+        <button class="navbtn" id="prev-month">&lsaquo;</button>
+        <h3 id="cal-label"></h3>
+        <button class="navbtn" id="next-month">&rsaquo;</button>
+      </div>
+      <div class="cal-grid" id="cal-dow"></div>
+      <div class="cal-grid" id="cal-grid" style="margin-top:6px;"></div>
+      <div class="legend">
+        <span><span class="dot available"></span> Disponível</span>
+        <span><span class="dot blocked"></span> Bloqueada (já reservada em outro canal)</span>
+      </div>
+      <p id="cal-msg" class="msg"></p>
+    </div>
+  </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  var loginView = document.getElementById('login-view');
+  var appView = document.getElementById('app-view');
+  var loginMsg = document.getElementById('login-msg');
+
+  if (!window.FIREBASE_CONFIG || window.FIREBASE_CONFIG.apiKey === 'COLE_AQUI') {
+    loginView.innerHTML = '<h1>Configuração pendente</h1>' +
+      '<p class="sub">O arquivo <code>firebase-config.js</code> ainda não foi preenchido com as credenciais do projeto Firebase. Preencha esse arquivo e recarregue a página.</p>';
+    return;
+  }
+
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  var blockedDates = [];
+  var cursor = new Date();
+  cursor.setDate(1);
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toISO(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function isPast(d){
+    var today = new Date(); today.setHours(0,0,0,0);
+    return d < today;
+  }
+
+  document.getElementById('login-btn').addEventListener('click', function(){
+    var email = document.getElementById('email').value.trim();
+    var pass = document.getElementById('password').value;
+    loginMsg.textContent = 'Entrando...';
+    loginMsg.className = 'msg';
+    auth.signInWithEmailAndPassword(email, pass).catch(function(err){
+      loginMsg.textContent = 'Não foi possível entrar: ' + (err.code === 'auth/invalid-credential' ? 'e-mail ou senha incorretos.' : err.message);
+      loginMsg.className = 'msg err';
+    });
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', function(){
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged(function(user){
+    if (user) {
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      loadPrice();
+      loadBlockedAndRender();
+    } else {
+      appView.classList.add('hidden');
+      loginView.classList.remove('hidden');
+    }
+  });
+
+  function loadPrice(){
+    db.collection('site').doc('config').get().then(function(doc){
+      var price = doc.exists ? doc.data().pricePerNight : '';
+      document.getElementById('price').value = price || '';
+    });
+  }
+
+  document.getElementById('save-price-btn').addEventListener('click', function(){
+    var val = Number(document.getElementById('price').value);
+    var msg = document.getElementById('price-msg');
+    if (!val || val <= 0) {
+      msg.textContent = 'Informe um valor válido.';
+      msg.className = 'msg err';
+      return;
+    }
+    db.collection('site').doc('config').set({ pricePerNight: val }, { merge: true }).then(function(){
+      msg.textContent = 'Preço salvo.';
+      msg.className = 'msg ok';
+    }).catch(function(err){
+      msg.textContent = 'Erro ao salvar: ' + err.message;
+      msg.className = 'msg err';
+    });
+  });
+
+  function loadBlockedAndRender(){
+    db.collection('availability').doc('blocked').get().then(function(doc){
+      blockedDates = doc.exists ? (doc.data().dates || []) : [];
+      renderCalendar();
+    });
+  }
+
+  function toggleDate(iso){
+    var msg = document.getElementById('cal-msg');
+    var ref = db.collection('availability').doc('blocked');
+    var isBlocked = blockedDates.indexOf(iso) !== -1;
+    var op = isBlocked
+      ? firebase.firestore.FieldValue.arrayRemove(iso)
+      : firebase.firestore.FieldValue.arrayUnion(iso);
+    ref.set({ dates: op }, { merge: true }).then(function(){
+      if (isBlocked) { blockedDates.splice(blockedDates.indexOf(iso), 1); }
+      else { blockedDates.push(iso); }
+      renderCalendar();
+      msg.textContent = '';
+    }).catch(function(err){
+      msg.textContent = 'Erro ao salvar: ' + err.message;
+      msg.className = 'msg err';
+    });
+  }
+
+  var dowNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  var dowEl = document.getElementById('cal-dow');
+  dowNames.forEach(function(n){
+    var d = document.createElement('div');
+    d.className = 'cal-dow';
+    d.textContent = n;
+    dowEl.appendChild(d);
+  });
+
+  function renderCalendar(){
+    var label = cursor.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    document.getElementById('cal-label').textContent = label;
+
+    var grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    var year = cursor.getFullYear();
+    var month = cursor.getMonth();
+    var firstDow = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (var i = 0; i < firstDow; i++) {
+      var empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var date = new Date(year, month, day);
+      var iso = toISO(date);
+      var cell = document.createElement('div');
+      cell.textContent = day;
+      cell.className = 'cal-day';
+
+      if (isPast(date)) {
+        cell.classList.add('past');
+      } else if (blockedDates.indexOf(iso) !== -1) {
+        cell.classList.add('blocked');
+        cell.addEventListener('click', function(iso){ return function(){ toggleDate(iso); }; }(iso));
+      } else {
+        cell.classList.add('available');
+        cell.addEventListener('click', function(iso){ return function(){ toggleDate(iso); }; }(iso));
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  document.getElementById('prev-month').addEventListener('click', function(){
+    cursor.setMonth(cursor.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('next-month').addEventListener('click', function(){
+    cursor.setMonth(cursor.getMonth() + 1);
+    renderCalendar();
+  });
+})();
+</script>
+</body>
+</html>

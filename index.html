@@ -226,6 +226,45 @@
   .g-tall{grid-row:span 2;}
   .g-wide{grid-column:span 2;}
 
+  /* ---------- disponibilidade ---------- */
+  .booking{background:var(--bg-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .booking-head{max-width:60ch; margin-bottom:44px;}
+  .booking-head h2{font-size:clamp(1.7rem,3.4vw,2.5rem); margin-top:14px;}
+  .booking-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:start;}
+  @media (max-width:860px){ .booking-grid{grid-template-columns:1fr;} }
+  .booking-card{background:var(--surface); border:1px solid var(--line); padding:28px;}
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .cal-head h3{margin:0; font-size:1.05rem; font-family:var(--font-display); font-weight:500; text-transform:capitalize;}
+  .cal-head .navbtn{
+    background:transparent; border:1px solid var(--line); color:var(--ink);
+    width:32px; height:32px; border-radius:2px; font-size:1rem; cursor:pointer;
+  }
+  .cal-head .navbtn:hover{border-color:var(--accent); color:var(--accent);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal-dow{text-align:center; font-size:0.68rem; color:var(--muted); text-transform:uppercase; padding-bottom:6px;}
+  .cal-day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:2px; font-size:0.82rem; border:1px solid transparent;
+    background:var(--bg-2); color:var(--ink-dim); cursor:pointer;
+  }
+  .cal-day.empty{visibility:hidden; cursor:default;}
+  .cal-day.past,.cal-day.blocked{opacity:0.35; cursor:not-allowed; text-decoration:line-through;}
+  .cal-day.blocked{color:#c25b4a; opacity:0.6;}
+  .cal-day.available:hover{border-color:var(--accent); color:var(--ink);}
+  .cal-day.selected{background:var(--accent); color:#1a1208; font-weight:600;}
+  .cal-day.in-range{background:var(--accent-soft); color:var(--ink);}
+  .cal-legend{display:flex; gap:16px; margin-top:16px; font-size:0.74rem; color:var(--muted); flex-wrap:wrap;}
+  .cal-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .cal-dot{width:9px; height:9px; border-radius:50%;}
+  .cal-dot.accent{background:var(--accent);}
+  .cal-dot.blocked{background:#c25b4a;}
+  .booking-summary h3{font-size:1.1rem; margin-bottom:16px;}
+  .summary-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:0.88rem; color:var(--ink-dim);}
+  .summary-row strong{color:var(--ink); font-weight:500;}
+  .summary-total{display:flex; justify-content:space-between; padding-top:16px; font-family:var(--font-display); font-size:1.3rem; color:var(--accent);}
+  .booking-summary .btn{width:100%; justify-content:center; margin-top:20px;}
+  .booking-note{font-size:0.78rem; color:var(--muted); margin-top:12px;}
+
   /* ---------- localização ---------- */
   .local-grid{display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line);}
   @media (max-width:860px){ .local-grid{grid-template-columns:1fr;} }
@@ -299,6 +338,7 @@
     <li><a href="#experiencia">Experiência</a></li>
     <li><a href="#comodidades">Comodidades</a></li>
     <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#disponibilidade">Disponibilidade</a></li>
     <li><a href="#localizacao">Localização</a></li>
   </ul>
   <a class="btn btn-ghost btn-sm" href="https://wa.me/5535900000000?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20sobre%20disponibilidade%20do%20Chal%C3%A9%20Al%C3%A9m%20do%20Horizonte." target="_blank" rel="noopener">Reservar</a>
@@ -479,6 +519,39 @@
   </div>
 </section>
 
+<section class="booking" id="disponibilidade">
+  <div class="wrap">
+    <div class="booking-head">
+      <span class="eyebrow">Disponibilidade</span>
+      <h2>Veja as datas livres e reserve na hora</h2>
+    </div>
+    <div class="booking-grid">
+      <div class="booking-card">
+        <div class="cal-head">
+          <button class="navbtn" id="prev-month" aria-label="Mês anterior">&lsaquo;</button>
+          <h3 id="cal-label"></h3>
+          <button class="navbtn" id="next-month" aria-label="Próximo mês">&rsaquo;</button>
+        </div>
+        <div class="cal-grid" id="cal-dow"></div>
+        <div class="cal-grid" id="cal-grid" style="margin-top:6px;"></div>
+        <div class="cal-legend">
+          <span><span class="cal-dot accent"></span> Selecionado</span>
+          <span><span class="cal-dot blocked"></span> Indisponível</span>
+        </div>
+      </div>
+      <div class="booking-card booking-summary">
+        <h3>Sua reserva</h3>
+        <div class="summary-row"><span>Check-in</span><strong id="sum-checkin">Selecione uma data</strong></div>
+        <div class="summary-row"><span>Check-out</span><strong id="sum-checkout">—</strong></div>
+        <div class="summary-row"><span>Noites</span><strong id="sum-nights">—</strong></div>
+        <div class="summary-total"><span>Total</span><span id="sum-total">—</span></div>
+        <a class="btn" id="booking-whatsapp" href="#" target="_blank" rel="noopener" style="pointer-events:none; opacity:0.5;">Reservar pelo WhatsApp</a>
+        <p class="booking-note" id="booking-note">Clique numa data de check-in e depois numa data de check-out no calendário ao lado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="wrap" id="localizacao">
   <div class="local-grid">
     <div class="local-text">
@@ -541,5 +614,166 @@
   <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.7 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.6.7 1.9.8 2 .1.2.1.4 0 .6-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.8.9.3.1.5.2.5.3.1.2.1.7-.1 1.2Z"/></svg>
   WhatsApp
 </a>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  var WHATSAPP_NUMBER = '5535900000000';
+
+  var calLabel = document.getElementById('cal-label');
+  var calGrid = document.getElementById('cal-grid');
+  var calDow = document.getElementById('cal-dow');
+  if (!calGrid) return;
+
+  var pricePerNight = null;
+  var blockedDates = [];
+  var cursor = new Date();
+  cursor.setDate(1);
+  var checkin = null;
+  var checkout = null;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toISO(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function toBR(iso){ var p = iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  function isPast(d){ var today = new Date(); today.setHours(0,0,0,0); return d < today; }
+  function currency(v){ return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }); }
+
+  var dowNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  dowNames.forEach(function(n){
+    var d = document.createElement('div');
+    d.className = 'cal-dow';
+    d.textContent = n;
+    calDow.appendChild(d);
+  });
+
+  function hasBlockedBetween(startIso, endIso){
+    return blockedDates.some(function(b){ return b > startIso && b < endIso; });
+  }
+
+  function updateSummary(){
+    var note = document.getElementById('booking-note');
+    var waLink = document.getElementById('booking-whatsapp');
+    document.getElementById('sum-checkin').textContent = checkin ? toBR(checkin) : 'Selecione uma data';
+    document.getElementById('sum-checkout').textContent = checkout ? toBR(checkout) : '—';
+
+    if (checkin && checkout) {
+      var nights = Math.round((new Date(checkout) - new Date(checkin)) / 86400000);
+      document.getElementById('sum-nights').textContent = nights + (nights === 1 ? ' noite' : ' noites');
+      if (pricePerNight) {
+        var total = nights * pricePerNight;
+        document.getElementById('sum-total').textContent = currency(total);
+        var msg = 'Olá! Vim pelo site e gostaria de reservar o Chalé Além do Horizonte de ' +
+          toBR(checkin) + ' a ' + toBR(checkout) + ' (' + nights + (nights === 1 ? ' noite' : ' noites') + ', total estimado ' + currency(total) + ').';
+        waLink.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
+      } else {
+        document.getElementById('sum-total').textContent = 'sob consulta';
+        var msg2 = 'Olá! Vim pelo site e gostaria de reservar o Chalé Além do Horizonte de ' +
+          toBR(checkin) + ' a ' + toBR(checkout) + ' (' + nights + (nights === 1 ? ' noite' : ' noites') + ').';
+        waLink.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg2);
+      }
+      waLink.style.pointerEvents = 'auto';
+      waLink.style.opacity = '1';
+      note.textContent = 'Confirme os detalhes finais pelo WhatsApp.';
+    } else {
+      document.getElementById('sum-nights').textContent = '—';
+      document.getElementById('sum-total').textContent = '—';
+      waLink.style.pointerEvents = 'none';
+      waLink.style.opacity = '0.5';
+      note.textContent = checkin
+        ? 'Agora escolha a data de check-out.'
+        : 'Clique numa data de check-in e depois numa data de check-out no calendário ao lado.';
+    }
+  }
+
+  function onDayClick(iso){
+    var note = document.getElementById('booking-note');
+    if (!checkin || (checkin && checkout)) {
+      checkin = iso;
+      checkout = null;
+    } else if (iso <= checkin) {
+      checkin = iso;
+      checkout = null;
+    } else if (hasBlockedBetween(checkin, iso)) {
+      note.textContent = 'Há uma data indisponível nesse intervalo. Escolha outro período.';
+      checkin = iso;
+      checkout = null;
+    } else {
+      checkout = iso;
+    }
+    renderCalendar();
+    updateSummary();
+  }
+
+  function renderCalendar(){
+    calLabel.textContent = cursor.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    calGrid.innerHTML = '';
+
+    var year = cursor.getFullYear();
+    var month = cursor.getMonth();
+    var firstDow = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (var i = 0; i < firstDow; i++) {
+      var empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      calGrid.appendChild(empty);
+    }
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var date = new Date(year, month, day);
+      var iso = toISO(date);
+      var cell = document.createElement('div');
+      cell.textContent = day;
+      cell.className = 'cal-day';
+
+      var blocked = blockedDates.indexOf(iso) !== -1;
+      if (isPast(date) || blocked) {
+        cell.classList.add(blocked ? 'blocked' : 'past');
+      } else {
+        cell.classList.add('available');
+        if (iso === checkin || iso === checkout) cell.classList.add('selected');
+        else if (checkin && checkout && iso > checkin && iso < checkout) cell.classList.add('in-range');
+        cell.addEventListener('click', function(iso){ return function(){ onDayClick(iso); }; }(iso));
+      }
+      calGrid.appendChild(cell);
+    }
+  }
+
+  document.getElementById('prev-month').addEventListener('click', function(){
+    cursor.setMonth(cursor.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('next-month').addEventListener('click', function(){
+    cursor.setMonth(cursor.getMonth() + 1);
+    renderCalendar();
+  });
+
+  if (!window.FIREBASE_CONFIG || window.FIREBASE_CONFIG.apiKey === 'COLE_AQUI') {
+    document.getElementById('booking-note').textContent = 'Calendário em configuração — volte em breve.';
+    renderCalendar();
+    return;
+  }
+
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  var db = firebase.firestore();
+
+  Promise.all([
+    db.collection('site').doc('config').get(),
+    db.collection('availability').doc('blocked').get()
+  ]).then(function(results){
+    var configDoc = results[0];
+    var blockedDoc = results[1];
+    pricePerNight = configDoc.exists ? (configDoc.data().pricePerNight || null) : null;
+    blockedDates = blockedDoc.exists ? (blockedDoc.data().dates || []) : [];
+    renderCalendar();
+    updateSummary();
+  }).catch(function(){
+    document.getElementById('booking-note').textContent = 'Não foi possível carregar o calendário agora. Fale com a gente pelo WhatsApp.';
+    renderCalendar();
+  });
+})();
+</script>
 </body>
 </html>
